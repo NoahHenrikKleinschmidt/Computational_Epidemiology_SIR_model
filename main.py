@@ -7,15 +7,26 @@ import streamlit as st
 sir = model.SIR()
 
 # setup app 
+
 st.set_page_config(
      page_title="Disease Dynamics SIR Modeller",
      page_icon="📈",
      layout="wide",
-     menu_items={
-         'To the Repo': 'https://github.com/NoahHenrikKleinschmidt/Computational_Epidemiology_SIR_model',
+    #  menu_items={
+    #      'To the Repo': 'https://github.com/NoahHenrikKleinschmidt/Computational_Epidemiology_SIR_model',
          
-     }
+    #  }
 )
+
+st.sidebar.markdown("""
+The underlying system of equations can be found at the repo of this app on [Github](https://github.com/NoahHenrikKleinschmidt/Computational_Epidemiology_SIR_model)
+""")
+
+st.sidebar.markdown("## Set slider limits \n ---")
+
+# set slider limits
+max_population = st.sidebar.number_input("Population Size", value = 1000)
+
 st.title("Impact of Population Heterogeneity for Disease Dynamics")
 
 st.markdown("---")
@@ -33,7 +44,7 @@ c1, c2, c3 = controls_panel.columns((1, 1, 1))
 c1.markdown("Population Settings \n ---")
 
 high_p = c1.slider("Percentage of highly susceptibles", min_value = 0.001, max_value = 0.999, value = 0.02, step = 0.001)
-starting_population = c1.slider("Population size", min_value = 10, max_value = 1000, value = 100)
+starting_population = c1.slider("Population size", min_value = 10, max_value = max_population, value = 100)
 starting_infectuous = c1.slider("Initial Spreaders", min_value = 0, max_value = 100, value = 1)
 
 # add values to the sir model
