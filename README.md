@@ -1,6 +1,8 @@
 # Effect of population heterogeneity in disease dynamics
 ### A project for Computational Epidemiology (Course: 467294-HS2021)
 
+[![Open the interactive Web-App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/noahhenrikkleinschmidt/computational_epidemiology_sir_model/main/main.py)
+
 This project models the effect of two subgroups within a population. These subgroups are colloquially termed either "normally" susceptible ($S_n$, default average person) or "highly" susceptible ($S_h$, a subgroup that differs from the average by some parameters). $S_h$ are modelled as a linear-transform of $S_n$ and may differ in any combination of infection rate, recovery rate, death rate, and/or relapsation rate (loss of immunity) from $S_n$ by a scalar increase or decrease relative to $S_n$'s respective transition rate.
 
 
