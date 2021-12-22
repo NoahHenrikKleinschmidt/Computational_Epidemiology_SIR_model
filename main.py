@@ -6,6 +6,16 @@ import streamlit as st
 # initialise the model
 sir = model.SIR()
 
+# setup app 
+st.set_page_config(
+     page_title="Disease Dynamics SIR Modeller",
+     page_icon="📈",
+     layout="wide",
+     menu_items={
+         'To the Repo': 'https://github.com/NoahHenrikKleinschmidt/Computational_Epidemiology_SIR_model',
+         
+     }
+)
 st.title("Impact of Population Heterogeneity for Disease Dynamics")
 
 st.markdown("---")
