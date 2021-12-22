@@ -1,18 +1,36 @@
 """
 This module specifies the SIR Model for this project
-Parameters of this model are: 
 
 ---------------------------------------------------------------------------
-norm_p      The percentage of normally susceptibles within the population
+Parameters of this model are: 
+---------------------------------------------------------------------------
+percentage  The percentage of highly susceptibles within the population 
+            (stored as 1-p, since the model tracks the percentage of 
+            normally susceptibles...)
 *_rate      A transition rate for normally susceptibles,
             highly susceptibles will be factor x *_rate 
-k           k-fold increased infection rate for highly susceptibles (vs. 
-            normally susceptibles)
-theta       percentage of I→D from I→(R'+D)
-j           k-fold decreased recovery rate for highly susceptibles
-h           h-fold changed relapsation rate for highly susceptibles
-q           q-fold increased death rate for highly susceptibles
+*_factor    The scalar factor for highly susceptibles
+initials    Initial values for population
+            Default: 100 susceptibles, 1 infectuous, 0 dead, 0 recovered
 ---------------------------------------------------------------------------
+
+-----------------------------------------
+Usage:
+-----------------------------------------
+# setup 
+model = SIR()
+
+# defining initial parameters
+model.rates( infection_rate = 0.04 )
+ ...
+
+# solving the model equations
+timespace, solutions = model.solve()
+
+# visualising results
+fig = LineChart(timespace, solutions)
+fig.show()
+-----------------------------------------
 """
 
 from scipy.integrate import solve_ivp # numerical ODE solver from scipy
