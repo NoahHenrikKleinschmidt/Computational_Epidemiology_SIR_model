@@ -12,6 +12,7 @@ st.set_page_config(
      page_title="Disease Dynamics SIR Modeller",
      page_icon="📈",
      layout="wide",
+     initial_sidebar_state = "collapsed",
     #  menu_items={
     #      'To the Repo': 'https://github.com/NoahHenrikKleinschmidt/Computational_Epidemiology_SIR_model',
          
