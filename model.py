@@ -22,36 +22,44 @@ import plotly.graph_objects as go
 import pandas as pd
 
 
+def ratio_impact(norm_p, factor):
+    """
+    Returns a_n + factor*a_h, 
+    the Φ impact of highly susceptibles
+    """
+    impact = norm_p + factor * (1 - norm_p)
+    return impact
 
 def _infection_rate(infection_rate, norm_p, k):
     """
     Returns the cumulated rate at which susceptibles transition to infected
     """
-    rate = 1 - norm_p
-    rate = norm_p + k * rate
-    rate = infection_rate * rate
+    rate = ratio_impact(norm_p, k)
+    rate = rate * infection_rate
     return rate
 
-def _relapsation_rate(relapsation_rate, h):
+def _relapsation_rate(relapsation_rate, norm_p, h):
     """
     Returns the rate at which Recovered people relapse
     """
-    rate = relapsation_rate * ( 1 + h )
+    rate = ratio_impact(norm_p, h)
+    rate = relapsation_rate * rate
     return rate
 
-def _recovery_rate(recovery_rate, theta, j):
+def _recovery_rate(recovery_rate, norm_p, j):
     """
     Returns the rate at which infected transition to recovered
     """
-    rate = (1 - theta) * recovery_rate
-    rate = ( 1 + j ) * rate
+    rate = ratio_impact(norm_p, j)
+    rate = rate * recovery_rate
     return rate
 
-def _death_rate(theta, q):
+def _death_rate(theta, norm_p, q):
     """
     Returns the rate at which infected transition to dead
     """
-    rate = (1 + q)*theta
+    rate = ratio_impact(norm_p, q)
+    rate = theta * rate
     return rate
 
 # setup the surrounding parameters of the SIRD Model
@@ -80,17 +88,17 @@ def SIRD(
     
     # setup the diff equations
     dS_dt = - _infection_rate(infection_rate, norm_p, k) * S * I \
-            + _relapsation_rate(relapsation_rate, h) * R
+            + _relapsation_rate(relapsation_rate, norm_p, h) * R
 
 
     dI_dt = _infection_rate(infection_rate, norm_p, k) * S * I \
-            - _recovery_rate(recovery_rate, theta, j) * I \
-            - _death_rate(theta, q) * I
+            - _recovery_rate(recovery_rate, norm_p, j) * I \
+            - _death_rate(theta, norm_p, q) * I
     
-    dR_dt = _recovery_rate(recovery_rate, theta, j) * I \
-            - _relapsation_rate(relapsation_rate, h) * R
+    dR_dt = _recovery_rate(recovery_rate, norm_p, j) * I \
+            - _relapsation_rate(relapsation_rate, norm_p, h) * R
     
-    dD_dt = _death_rate(theta, q) * I
+    dD_dt = _death_rate(theta, norm_p, q) * I
 
     return [dS_dt, dI_dt, dR_dt, dD_dt]
 
