@@ -39,12 +39,24 @@ import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 import pandas as pd
 
+# Alright Battleplan:
+# - setup n_subgroups (int) << CHECK
+# - setup percentages (cuple of len n) << CHECK
+# - setup factors (tuple of len n) << CHECK
+# - methods to setup n_subgroups -> init << CHECK
+# - method to setup factors << CHECK
+# - modify ratio_impact to work with percentages  << CHECK
+
 
 class SIR:
     """
     This class handles the SIR Model
     """
-    def __init__(self):
+    def __init__(self, subgroups:int):
+        """
+        The SIR Model for a given population containing n divergent subgroups. 
+        Note that subgroups does not include the "normally" susceptibles (they will be added externally)
+        """
         self._pop = 100
         self._infected = 1
         
@@ -52,7 +64,11 @@ class SIR:
         self._timeend = 10
         self._timespace = np.linspace(self._timestart, self._timeend, 10000)
 
-        self._percent_norms = 0.95      # percentage of "normally" susceptibles
+        self._subgroups = subgroups+1
+
+        # setup percentages of the different subgroups (initial all equal)
+        self._percentages = [1/self._subgroups for i in range(self._subgroups)]    
+
         self._initials = (100, 1, 0, 0) # initial values for SIR model (100 people, 1 infected, 0 recovered or dead)
 
         self._inf_rate = 0.4        # infection rate
@@ -60,10 +76,18 @@ class SIR:
         self.__death_rate = 0.01    # death rate
         self._rel_rate = 0.005      # relapsation rate
 
-        self._inf_factor = 1.5
-        self._rec_factor = 0.6
-        self._death_factor = 1.2
-        self._rel_factor = 1.4
+        # setup the rates factors for the different subgroups
+        self._inf_factor = [1 for i in range(subgroups)]
+        self._rec_factor = [1 for i in range(subgroups)]
+        self._death_factor = [1 for i in range(subgroups)]
+        self._rel_factor = [1 for i in range(subgroups)]
+
+
+    def groups(self):
+        """
+        Returns the number of subgroups
+        """
+        return self._subgroups
 
     def model(self, t, initials):
         """
@@ -146,33 +170,55 @@ class SIR:
 
     def factors(self, infection_factor=None, recovery_factor=None, death_factor=None, relapsation_factor=None):
         """
-        Set new scaling factors for "highly" susceptibles
+        Set new scaling factors for the different subgroups
+        (NOTE: factors are tuples of length subgroups-1, as the 
+        first group are the reference group of "normally" susceptibles)
         """
-        if infection_factor is not None: self._inf_factor = infection_factor
-        if recovery_factor is not None: self._rec_factor = recovery_factor
-        if death_factor is not None: self._death_factor = death_factor
-        if relapsation_factor is not None: self._rel_factor = relapsation_factor
+
+        str_attributes = ["_inf_factor", "_rec_factor", "_death_factor", "_rel_factor"]
+        factors = [infection_factor, recovery_factor, death_factor, relapsation_factor]
+        
+        for factor, attribute in zip(factors, str_attributes):
+            
+                self._update_factor(attribute, factor)
 
         return self._inf_factor, self._rec_factor, self._death_factor, self._rel_factor
+  
 
-    def percentage(self, p=None):
+    def percentages(self, p:tuple=None):
         """
-        Set the percentage of "highly" susceptibles in the population
+        Set the percentages for the different subgroups
+        (has to have an entry for each divergent subgroup, but NOT the "normally" susceptibles!)
         """
         if p is not None:
-            if p > 1: 
-                print(f"p must be <= 1! Received: {p} ...")
-                return
-            self._percent_norms = 1 - p
+            # convert percentages into list
+            p = [p] if isinstance(p, (float, int)) else list(p)
+            if len(p) == self._subgroups-1 and sum(p) <= 1:
+                p.insert(0, 1-sum(p)) # add normally susceptible percentage at the beginning
+                self._percentages = p
+            else:
+                print(f"Percentages tuple has to have {self._subgroups} entries (got {len(p)}), and sum up to max 1 (current sum = {sum(p)})...")
         else:
-            return 1 - self._percent_norms
+            return self._percentages
 
-    def _ratio_impact(self, factor):
+    def _update_factor(self, attr:str, factor:tuple):
         """
-        Returns a_n + factor*a_h, 
-        -> i.e. the Φ impact of highly susceptibles
+        Update a factor attribute based on its name as as string
+        """             
+        if factor is None: 
+            return
+        factor = [factor] if isinstance(factor, (float, int)) else list(factor)
+        if len(factor) == self._subgroups-1:
+            setattr(self, attr, factor)
+          
+
+    def _ratio_impact(self, factor:tuple):
         """
-        impact = self._percent_norms + factor * (1 - self._percent_norms)
+        The Φ impact of highly susceptibles
+        """
+        impact = self._percentages[0] 
+        for p, f in zip(self._percentages[1:], factor):
+            impact += f * p
         return impact
 
     def _infection_rate(self):
@@ -261,3 +307,16 @@ def TimepointBarChart(t, timepoints, solutions, population):
 
 # fig = LineChart()
 # fig.show()
+
+if __name__ == '__main__':
+
+    model = SIR(subgroups = 2)
+    model.percentages((0.43, 0.22))
+    model.factors(
+        infection_factor = (3, 12),
+        recovery_factor = (12, 0.99),
+    )
+    print(model.factors())
+
+    t, s = model.solve()
+    print(s)

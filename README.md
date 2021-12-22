@@ -3,7 +3,7 @@
 
 [![Open the interactive Web-App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/noahhenrikkleinschmidt/computational_epidemiology_sir_model/main/main.py)
 
-This project models the effect of two subgroups within a population. These subgroups are colloquially termed either "normally" susceptible ($S_n$, default average person) or "highly" susceptible ($S_h$, a subgroup that differs from the average by some parameters). $S_h$ are modelled as a linear-transform of $S_n$ and may differ in any combination of infection rate, recovery rate, death rate, and/or relapsation rate (loss of immunity) from $S_n$ by a scalar increase or decrease relative to $S_n$'s respective transition rate.
+This project models the effect of three subgroups within a population. These subgroups are colloquially termed either "normally" susceptible ($S_n$, default average person) or "highly" susceptible ($S_h$, a subgroup that differs from the average by some parameters such as an elevated infection rate) and "lowly" susceptible ($S_l$, that differs from the average by some parameters such as elevated recovery rate). $S_h$ and $S_l$ are modelled as a linear-transform of $S_n$ and may differ in any combination of infection rate, recovery rate, death rate, and/or relapsation rate (loss of immunity) from $S_n$ by a scalar increase or decrease relative to $S_n$'s respective transition rate. 
 
 
 ## The SIR Model
@@ -22,16 +22,16 @@ where $\alpha_i$ are the percentages of each sub-group within the population, $\
 
 ### Infectious Population $I$ 
 
-As both $S_n$ and $S_h$ are assumed to have different susceptibilities, they are assigned two different rates of infection: $\beta_n$ and $\beta_h$, where we assume for simplicity sake (see Introduction) that $\beta_h = k\cdot\beta_n$ for some $k \in \mathbb{R}$. Given the scalar relation between $\beta_n$ and $\beta_h$ we abbreviate $\beta_n \equiv \beta$, as we will do for any transition rate henceforth.
+As all $S_n$, $S_h$, and $S_l$ are assumed to have different susceptibilities, they are assigned three different rates of infection: $\beta_n$, $\beta_h$,  and $\beta_l$, where we assume for simplicity sake (see Introduction) that $\beta_h = k\cdot\beta_n$ and $\beta_l = k'\cdot\beta_n$ for some $k, k' \in \mathbb{R}$. Given the scalar relation between $\beta_n$, $\beta_h$, and $\beta_l$ we abbreviate $\beta_n \equiv \beta$, as we will do for any transition rate henceforth.
 
 
 ### Removed Population $R$ 
 
 The removed population $R$ consists of two sub-populations, namely the recovered population $R'$ and the deceased population $D$. Infectious individuals may transition into either $R'$ or $D$, given two separate transition rates. 
 
-We define the recovery rate $\gamma$ and death rate $\theta$ whose scaled rates for the "highly" susceptibles are $\gamma_h = j\cdot\gamma$ and $\theta_h = q \cdot \theta$ for some $j, q \in \mathbb{R}$, respectively.
+We define the recovery rate $\gamma$ and death rate $\theta$ whose scaled rates for the "highly" susceptibles are $\gamma_h = j\cdot\gamma$ and $\theta_h = q \cdot \theta$ and $\gamma_l = j'\cdot\gamma$ and $\theta_l = q' \cdot \theta$ for the "lowly" susceptibles, for some $j, q, j', q' \in \mathbb{R}$, respectively.
 
-We further define a relapsation rate $\delta$ that mimics how immunity is lost over time (perhaps due to newly emerging mutant pathogens) and allows individuals from $R'$ to relapse into $S$. Here as well "highly" susceptibles are linearly scaled as $\delta_h = h \cdot \delta$ for some $h \in \mathbb{R}$. 
+We further define a relapsation rate $\delta$ that mimics how immunity is lost over time (perhaps due to newly emerging mutant pathogens) and allows individuals from $R'$ to relapse into $S$. Here as well "highly" susceptibles are linearly scaled as $\delta_h = h \cdot \delta$ for some $h \in \mathbb{R}$, as are the "lowly" susceptibles by $\delta_l = h' \cdot \delta$ for some $h' \in \mathbb{R}$. 
 
 ### System of Equations 
 
@@ -49,7 +49,7 @@ $$
 \end{align}
 $$
 
-Where $\Phi_x = \alpha_n + x\cdot \alpha_h$ describes the impact of "highly" susceptibles within the total population for some scalar factor $x$ of a given transition. 
+Where $\Phi_x = \alpha_n + x\cdot \alpha_h + x'\cdot \alpha_l$ describes the impact of "highly" susceptibles within the total population for some scalar factors $x$ and $x'$ of a given transition for the two non-average subgroups. 
 
 
 This set of differential equations now has four separate rates of transition: (1) $\beta$, the rate of infection, where "highly" susceptibles are distinguished by a $k$-fold increase/ decrease. (2) $\gamma$, the rate of recovery, where "highly" susceptibles are distinguished by a $j$-fold increase/decrease. (3) $\delta$, the relapsation rate, where "highly" susceptibles are distinguished by an $h$-fold increase/drecrease. And (4) $\theta$, the death rate, where "highly" susceptibles are distinguished by a $q$-fold increase/decrease compared to "normally" susceptibles. All of these are editable to explore different scenarios of heterogeneous populations. 
