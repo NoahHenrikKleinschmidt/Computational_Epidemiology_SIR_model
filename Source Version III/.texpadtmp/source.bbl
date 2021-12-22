@@ -1,0 +1,92 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 2.9 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{nty/global//global/global}
+    \entry{PCRorig}{article}{}
+      \name{author}{2}{}{%
+        {{hash=4da8ed059f95503fc561f02c05ad39fb}{%
+           family={MULLIS},
+           familyi={M\bibinitperiod},
+           given={KARY\bibnamedelima B.},
+           giveni={K\bibinitperiod\bibinitdelim B\bibinitperiod}}}%
+        {{hash=602ec19a9dcfa0f78270354bfee3f12f}{%
+           family={FALOONA},
+           familyi={F\bibinitperiod},
+           given={FRED\bibnamedelima A.},
+           giveni={F\bibinitperiod\bibinitdelim A\bibinitperiod}}}%
+      }
+      \name{editor}{3}{}{%
+        {{hash=beae8b26bfdc3beb1d470190c7939750}{%
+           family={Wu},
+           familyi={W\bibinitperiod},
+           given={Ray},
+           giveni={R\bibinitperiod}}}%
+        {{hash=abd4a6fdeb69b42813a50c8951af73d3}{%
+           family={Grossman},
+           familyi={G\bibinitperiod},
+           given={Lawrence},
+           giveni={L\bibinitperiod}}}%
+        {{hash=f591e6bc941b3359f717036339d54da8}{%
+           family={Moldave},
+           familyi={M\bibinitperiod},
+           given={Kivie},
+           giveni={K\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {San Diego}%
+      }
+      \list{publisher}{1}{%
+        {Academic Press}%
+      }
+      \strng{namehash}{72b3dbdbdc3a95ed4369ba6ac317bbe2}
+      \strng{fullhash}{787d5718d6ddb0e79efae3ba9822acff}
+      \strng{bibnamehash}{787d5718d6ddb0e79efae3ba9822acff}
+      \strng{authorbibnamehash}{787d5718d6ddb0e79efae3ba9822acff}
+      \strng{authornamehash}{72b3dbdbdc3a95ed4369ba6ac317bbe2}
+      \strng{authorfullhash}{787d5718d6ddb0e79efae3ba9822acff}
+      \strng{editorbibnamehash}{1753f0a00b7c726134df5e277e77182b}
+      \strng{editornamehash}{27b651b2a09d6568af8186600d1df83b}
+      \strng{editorfullhash}{1753f0a00b7c726134df5e277e77182b}
+      \field{sortinit}{M}
+      \field{sortinithash}{cfd219b90152c06204fab207bc6c7cab}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{Publisher Summary This chapter discusses specific synthesis of DNA in vitro via a polymerase-catalyzed chain reaction. A source of DNA including the desired sequence is denatured in the presence of a large molar excess of two oligonucleotides and the four deoxyribonucleoside triphosphates. Oligonucleotides were synthesized using an automated DNA synthesis machine using phosphoramidite chemistry. Mispriming can be usefully employed to make intentional in vitro mutations or to add sequence information to one or both ends of a given sequence. Amplifications of other human loci have resulted in varying degrees of specificity and efficiency. The polymerase chain reaction has thus found immediate use in developmental DNA diagnostic procedures and in molecular cloning from genomic DNA.}
+      \field{isbn}{978-0-12-765560-4}
+      \field{journaltitle}{Recombinant DNA Methodology}
+      \field{series}{Selected Methods in Enzymology}
+      \field{title}{Specific Synthesis of DNA in Vitro via a Polymerase-Catalyzed Chain Reaction}
+      \field{year}{1989}
+      \field{pages}{189\bibrangedash 204}
+      \range{pages}{16}
+      \verb{doi}
+      \verb https://doi.org/10.1016/B978-0-12-765560-4.50015-0
+      \endverb
+      \verb{urlraw}
+      \verb http://www.sciencedirect.com/science/article/pii/B9780127655604500150
+      \endverb
+      \verb{url}
+      \verb http://www.sciencedirect.com/science/article/pii/B9780127655604500150
+      \endverb
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+

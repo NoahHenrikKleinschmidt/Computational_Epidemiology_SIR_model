@@ -19,7 +19,7 @@ from scipy.integrate import solve_ivp # numerical ODE solver from scipy
 import numpy as np 
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
-
+import pandas as pd
 
 
 
@@ -57,7 +57,7 @@ def _death_rate(theta, q):
 # setup the surrounding parameters of the SIRD Model
 
 norm_p = 0.95
-infection_rate = 0.7    # infection rate
+infection_rate = 0.4    # infection rate
 k = 1.6    # k = elevated infection rate for highly susceptibles
 recovery_rate = 0.5    # recovery rate
 j = 0.8    # j = reduced recovery rate for highly susceptibles
@@ -65,7 +65,7 @@ theta = 0.2    # death rate (percentage of recovery rate that are actually dying
 q = 1.2    # q = elevated death rate for highly susceptibles
 relapsation_rate = 0.1    # relapsation rate
 h = 1.3    # h = elevated relapsation rate for highly susceptibles
-
+        
 # setup the system of equations
 def SIRD(
         t, 
@@ -77,9 +77,7 @@ def SIRD(
     I = initials[1]
     R = initials[2]
     D = initials[3]
-
-
-
+    
     # setup the diff equations
     dS_dt = - _infection_rate(infection_rate, norm_p, k) * S * I \
             + _relapsation_rate(relapsation_rate, h) * R
@@ -96,47 +94,87 @@ def SIRD(
 
     return [dS_dt, dI_dt, dR_dt, dD_dt]
 
-# now setup simulation
-startpoint = 0 
-endpoint = 100
-steps = 10000
-timespace = np.linspace(startpoint, endpoint, steps)
 
-initials = ( \
-    99995,  # S
-    5,      # I
-    0,      # R
-    0,      # D 
-)
+# initials = ( \
+#     99995,  # S
+#     5,      # I
+#     0,      # R
+#     0,      # D 
+# )
 
-# solve SIRD_system
-SIRD_system = solve_ivp(
-                    SIRD, 
-                    (startpoint, endpoint), 
-                    initials, 
-                    method="RK45", 
-                    dense_output=True
-                )
+def solve(initials, start = 0, end = 100, steps = 10000):
+    """
+    Solve the equations based on initial parameters...
+    """
+    # now setup simulation
+    timespace = np.linspace(start, end, steps)
 
-# get and transpose results
-solution = SIRD_system.sol(timespace)
-solutions = [i.T for i in solution]
+    # solve SIRD_system
+    SIRD_system = solve_ivp(
+                        SIRD, 
+                        (start, end), 
+                        initials, 
+                        method="RK45", 
+                        dense_output=True
+                    )
+
+    # get and transpose results
+    solution = SIRD_system.sol(timespace)
+    solutions = [i.T for i in solution]
+    return timespace, solutions
 
 # visualise results
 
-def LineChart():
+def LineChart(timespace, solutions):
     fig = go.Figure()
 
-    for sol, name in zip(solutions, ["S", "I", "R", "D"]):
+    for sol, name in zip(solutions, ["Susceptibles", "Infected", "Recovered", "Dead"]):
         fig.add_trace(
             go.Scatter(
                         x=timespace, y=sol,
                         mode='lines',
-                        name=name
+                        name=name, 
+                        hoverinfo = "y+name"
                     )
                 )
-
+    fig.update_layout(
+        title = "Disease Dynamics",
+        xaxis = dict(
+            title = "Timespan (e.g. weeks or months)"
+        ), 
+        yaxis = dict(
+            title = "Number of People per Category"
+        )
+    )
     return fig
 
-fig = LineChart()
-fig.show()
+def TimepointBarChart(t, timepoints, solutions, population):
+    fig = go.Figure()
+
+    idx = np.where(timepoints == t)
+
+    names = ["Susceptibles", "Infected", "Recovered", "Dead"]
+
+    df = pd.DataFrame(
+                    dict(
+                        names = names, 
+                        y = [round(i[idx][0]) for i in solutions],
+                    )
+                )
+    fig.add_trace(
+        go.Bar(     
+            
+                    x=df["names"], 
+                    y=df["y"],
+                    # name=names, 
+                    # hoverinfo = "y+name"
+                )
+            )
+    fig.update_layout(
+        yaxis = dict( range = (0, population)), 
+        title = f"Population at t = {t}",
+    )
+    return fig
+
+# fig = LineChart()
+# fig.show()

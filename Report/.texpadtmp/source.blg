@@ -1,0 +1,9 @@
+[0] Config.pm:302> INFO - This is Biber 2.11
+[0] Config.pm:305> INFO - Logfile is '/Volumes/Blue/GIT/Computation_Epidemiology_HS21/Report/.texpadtmp/source.blg'
+[41] biber-darwin:313> INFO - === Wed Dec 22, 2021, 12:40:18
+[63] Biber.pm:371> INFO - Reading '/Volumes/Blue/GIT/Computation_Epidemiology_HS21/Report/.texpadtmp/source.bcf'
+[178] Biber.pm:857> INFO - Found 0 citekeys in bib section 0
+[186] Utils.pm:193> WARN - The file '/Volumes/Blue/GIT/Computation_Epidemiology_HS21/Report/.texpadtmp/source.bcf' does not contain any citations!
+[193] bbl.pm:617> INFO - Writing '/Volumes/Blue/GIT/Computation_Epidemiology_HS21/Report/.texpadtmp/source.bbl' with encoding 'UTF-8'
+[193] bbl.pm:720> INFO - Output to /Volumes/Blue/GIT/Computation_Epidemiology_HS21/Report/.texpadtmp/source.bbl
+[194] Biber.pm:110> INFO - WARNINGS: 1

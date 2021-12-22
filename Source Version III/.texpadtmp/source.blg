@@ -1,0 +1,15 @@
+[0] Config.pm:302> INFO - This is Biber 2.11
+[1] Config.pm:305> INFO - Logfile is '/Volumes/Blue/GIT/Computation_Epidemiology_HS21/Source Version III/.texpadtmp/source.blg'
+[41] biber-darwin:313> INFO - === Wed Dec 22, 2021, 11:13:36
+[68] Biber.pm:371> INFO - Reading '/Volumes/Blue/GIT/Computation_Epidemiology_HS21/Source Version III/.texpadtmp/source.bcf'
+[167] Biber.pm:857> INFO - Found 1 citekeys in bib section 0
+[180] Biber.pm:3976> INFO - Processing section 0
+[193] Biber.pm:4136> INFO - Looking for bibtex format file '/Volumes/Blue/GIT/Computation_Epidemiology_HS21/Source Version III/Bibliography.bib' for section 0
+[195] bibtex.pm:1500> INFO - LaTeX decoding ...
+[202] bibtex.pm:1316> INFO - Found BibTeX data source '/Volumes/Blue/GIT/Computation_Epidemiology_HS21/Source Version III/Bibliography.bib'
+[238] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
+[238] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
+[238] Biber.pm:3804> INFO - Sorting list 'nty/global//global/global' of type 'entry' with template 'nty' and locale 'en-US'
+[238] Biber.pm:3810> INFO - No sort tailoring available for locale 'en-US'
+[245] bbl.pm:617> INFO - Writing '/Volumes/Blue/GIT/Computation_Epidemiology_HS21/Source Version III/.texpadtmp/source.bbl' with encoding 'UTF-8'
+[246] bbl.pm:720> INFO - Output to /Volumes/Blue/GIT/Computation_Epidemiology_HS21/Source Version III/.texpadtmp/source.bbl
