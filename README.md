@@ -5,7 +5,7 @@
 
 This project models the effect of a variety of subgroups within a population on disease dynamics. To that end an SIR model was developed that models a susceptible population of various subgroups that differ in their infection rate, recovery rate, death rate, and/or relapsation rate (loss of immunity). Four different populations are assumed to that end: Susceptible $S$, Infectuous $I$, Recovered $R$, and Deceased $D$. Colloqually the term "population" will be used to refer to any or all non-deceased populations.
 
-## The SIR Model
+## The SIRD Model
 ---
 
 This model assumes the population contains a reference subgroup termed $S_n$ (for "normally" susceptibles) that transitions between Susceptible population $S$, to Infectuous $I$, Recovered $R$, or Desceased $D$ with some default transition rates (see below). This model allows for an arbitrary number of divergent subgroups $S_i$ within the population $S$, represented by a percentage $\alpha_i$. 
