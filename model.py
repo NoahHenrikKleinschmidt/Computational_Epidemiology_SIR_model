@@ -412,35 +412,35 @@ def simulate(model, p:np.array, steps = 10, model_R = False, ax = None, show=Fal
     # return ax
 
 
-model = SIR(subgroups = 2)
-model.initials(
-    (98, 12, 0, 0)
-)
-model.set_timespace(stop = 100)
+# model = SIR(subgroups = 2)
+# model.initials(
+#     (98, 12, 0, 0)
+# )
+# model.set_timespace(stop = 100)
 
-model.rates( infection_rate = 0.5, recovery_rate = 0.5 )
+# model.rates( infection_rate = 0.5, recovery_rate = 0.5 )
 
-model.factors( 
-    infection_factor    =       (20, 0.4),
-    recovery_factor     =       (0.5, 2), 
-    death_factor        =       (4, 0.1),
-    relapsation_factor  =       (2.5, 1),
-)
+# model.factors( 
+#     infection_factor    =       (20, 0.4),
+#     recovery_factor     =       (0.5, 2), 
+#     death_factor        =       (4, 0.1),
+#     relapsation_factor  =       (2.5, 1),
+# )
 
-# fig, axs = plt.subplots(ncols = 2)
+# # fig, axs = plt.subplots(ncols = 2)
 
-# ax1 = simulate(
-#                 model, 
-#                 p = np.array([(0.10, 0.75), (0.75, 0.25)]), 
-#                 ax = axs[0], R_ax = axs[1],
-#                 model_R = True,
-#                 # yscale = "log", 
-#             )
+# # ax1 = simulate(
+# #                 model, 
+# #                 p = np.array([(0.10, 0.75), (0.75, 0.25)]), 
+# #                 ax = axs[0], R_ax = axs[1],
+# #                 model_R = True,
+# #                 # yscale = "log", 
+# #             )
 
-# plt.tight_layout()
-# plt.show()
+# # plt.tight_layout()
+# # plt.show()
 
-model.solve()
-t = .15
-rval_chart = charts.LineChart(model)
-rval_chart.show()
+# model.solve()
+# t = .15
+# rval_chart = charts.LineChart(model)
+# rval_chart.show()

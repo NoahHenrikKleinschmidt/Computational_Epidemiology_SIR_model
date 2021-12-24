@@ -1,4 +1,5 @@
 import model
+import interactive_charts as charts
 import plotly.graph_objs as go
 import streamlit as st
 
@@ -29,9 +30,9 @@ st.sidebar.markdown("#### Transition Rates")
 # set slider limits
 max_population = st.sidebar.number_input("Maximum Population Size", value = 1000)
 max_spreaders = st.sidebar.number_input("Maximum Initial Spreaders", value = 100)
-max_infection_rate = st.sidebar.number_input("Maximum Infection Rate", value = 0.15)
-max_recovery_rate = st.sidebar.number_input("Maximum Recovery Rate", value = 2.0)
-max_death_rate = st.sidebar.number_input("Maximum Death Rate", value = 0.05)
+max_infection_rate = st.sidebar.number_input("Maximum Infection Rate", value = 5.0)
+max_recovery_rate = st.sidebar.number_input("Maximum Recovery Rate", value = 3.0)
+max_death_rate = st.sidebar.number_input("Maximum Death Rate", value = 1.0)
 max_relapsation_rate = st.sidebar.number_input("Maximum Relapsation Rate", value = 1.0)
 
 st.sidebar.markdown("#### \"Highly\" Susceptible's scalar factors")
@@ -54,10 +55,10 @@ st.markdown("---")
 
 # setup layout
 controls_container = st.container()
-setup_panel = controls_container.expander("Basic SIR Controls")
+setup_panel = controls_container.expander("Basic SIRD Controls")
 controls_panel = controls_container.expander("Subgroup Controls")
 plot_container = st.container()
-line_chart, bar_chart = plot_container.columns((2,1))
+line_controls, line_chart, bar_chart = plot_container.columns((0.2, 2,1))
 bottom_container = st.container()
 
 c1, c2  = setup_panel.columns((0.75, 1))
@@ -68,16 +69,16 @@ c1, c2  = setup_panel.columns((0.75, 1))
 
 # setup parameter controls
 # controls_container.markdown("Basic SIR Settings \n ---")
-n_subgroups = c1.number_input("Number of divergent subgroups", min_value = 1, value = 2, help = "Number of divergent subgroups that shall be created in the population")
+n_subgroups = c1.number_input("Number of divergent subgroups", min_value = 1, value = 1, help = "Number of divergent subgroups that shall be created in the population")
 st.session_state.n_subgroups = n_subgroups # this is the session state thing that makes the app remember attributes ...
 
-starting_population = c1.slider("Population size", min_value = 10, max_value = int(max_population), value = 100)
-starting_infectuous = c1.slider("Initial Spreaders", min_value = 0, max_value = int(max_spreaders), value = 1)
+starting_population = c1.slider("Population size", min_value = 2, max_value = int(max_population), value = 100)
+starting_infectuous = c1.slider("Initial Spreaders", min_value = 1, max_value = int(max_spreaders), value = 1)
 
 
 c2.markdown("Disease Rates \n ---")
 
-infection_rate = c2.slider("Infection Rate", min_value = 0.01, max_value = max_infection_rate, value = 0.08, step = 0.001, help = "The rate at which susceptibles become infected. Conceptually, the speed-of-spread.")
+infection_rate = c2.slider("Infection Rate", min_value = 0.01, max_value = max_infection_rate, value = 1.4, step = 0.01, help = "The rate at which susceptibles become infected. Conceptually, the speed-of-spread.")
 recovery_rate = c2.slider("Recovery Rate", min_value = 0.01, max_value = max_recovery_rate, value = 0.9, step = 0.01, help = "The rate at which infectous people recover. The percentage of infectous people who overcame the disease in a given timeframe (e.g. per day). Conceptually, a speed-of-recovery." )
 theta = c2.slider("Death Rate", min_value = 0.0, max_value = max_death_rate, value = 0.005, step = 0.001, format = "%e", help = "The rate at which infectous people die.\nConceptually, the percentage of infectous people whose disease status changed, and for whom this change meant death (rather than recovery).")
 relapsation_rate = c2.slider("Relapsation Rate", min_value = 0.000, max_value = max_relapsation_rate, value = 0.01, step = 0.001, format = "%e", help = "The rate at which recovered relaps to susceptibles.\nConceptually similar to the percentage of people who loose their immunity every day.")
@@ -165,7 +166,16 @@ timespace, solutions = sir.solve()
 
 # visualise Results
 
-linechart = model.LineChart(timespace, solutions)
+line_chart_type = line_controls.radio("Line Chart Type", ["LineChart", "PhaseChart"])
+
+if line_chart_type == "LineChart":
+
+    linechart = charts.LineChart(sir)
+    
+else:
+
+    linechart = charts.PhaseChart(sir)
+
 line_chart.plotly_chart(linechart, use_container_width=True)
-barchart = model.TimepointBarChart(endpoint, timespace, solutions, population)
+barchart = charts.TimepointBarChart(endpoint, sir)
 bar_chart.plotly_chart(barchart, use_container_width=True)
