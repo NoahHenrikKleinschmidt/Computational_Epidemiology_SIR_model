@@ -30,7 +30,7 @@ st.sidebar.markdown("#### Transition Rates")
 # set slider limits
 max_population = st.sidebar.number_input("Maximum Population Size", value = 1000)
 max_spreaders = st.sidebar.number_input("Maximum Initial Spreaders", value = 100)
-max_infection_rate = st.sidebar.number_input("Maximum Infection Rate", value = 5.0)
+max_infection_rate = st.sidebar.number_input("Maximum Infection Rate", value = 10.0)
 max_recovery_rate = st.sidebar.number_input("Maximum Recovery Rate", value = 3.0)
 max_death_rate = st.sidebar.number_input("Maximum Death Rate", value = 1.0)
 max_relapsation_rate = st.sidebar.number_input("Maximum Relapsation Rate", value = 1.0)
@@ -78,7 +78,7 @@ starting_infectuous = c1.slider("Initial Spreaders", min_value = 1, max_value = 
 
 c2.markdown("Disease Rates \n ---")
 
-infection_rate = c2.slider("Infection Rate", min_value = 0.01, max_value = max_infection_rate, value = 1.4, step = 0.01, help = "The rate at which susceptibles become infected. Conceptually, the speed-of-spread.")
+infection_rate = c2.slider("Infection Rate", min_value = 0.01, max_value = max_infection_rate, value = 5.0, step = 0.01, help = "The rate at which susceptibles become infected. Conceptually, the speed-of-spread.")
 recovery_rate = c2.slider("Recovery Rate", min_value = 0.01, max_value = max_recovery_rate, value = 0.9, step = 0.01, help = "The rate at which infectous people recover. The percentage of infectous people who overcame the disease in a given timeframe (e.g. per day). Conceptually, a speed-of-recovery." )
 theta = c2.slider("Death Rate", min_value = 0.0, max_value = max_death_rate, value = 0.005, step = 0.001, format = "%e", help = "The rate at which infectous people die.\nConceptually, the percentage of infectous people whose disease status changed, and for whom this change meant death (rather than recovery).")
 relapsation_rate = c2.slider("Relapsation Rate", min_value = 0.000, max_value = max_relapsation_rate, value = 0.01, step = 0.001, format = "%e", help = "The rate at which recovered relaps to susceptibles.\nConceptually similar to the percentage of people who loose their immunity every day.")
@@ -171,7 +171,7 @@ line_chart_type = line_controls.radio("Line Chart Type", ["LineChart", "PhaseCha
 if line_chart_type == "LineChart":
 
     linechart = charts.LineChart(sir)
-    
+
 else:
 
     linechart = charts.PhaseChart(sir)
