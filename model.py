@@ -305,25 +305,6 @@ class SIR:
         rate = self.__death_rate * rate
         return rate
 
-
-
-# fig = LineChart()
-# fig.show()
-
-# if __name__ == "__main__":
-
-    # model = SIR(subgroups = 2)
-    # model.percentages((0.43, 0.22))
-    # model.factors(
-    #     infection_factor = (3, 12),
-    #     recovery_factor = (12, 0.99),
-    # )
-    # print(model.factors())
-
-    # t, s = model.solve()
-    # print(s)
-
-
 def simulate(model, p:np.array, steps = 10, model_R = False, summary = False, ax = None, show=False, **kwargs):
     """
     Simulate the effect of changing population percentages 
@@ -361,8 +342,6 @@ def simulate(model, p:np.array, steps = 10, model_R = False, summary = False, ax
     if show: 
         plt.tight_layout()
         plt.show()
-
-
 
 
 
