@@ -14,30 +14,46 @@ initials    Initial values for population
             Default: 100 susceptibles, 1 infectuous, 0 dead, 0 recovered
 ---------------------------------------------------------------------------
 
------------------------------------------
+---------------------------------------------------------------------------
 Usage:
------------------------------------------
+---------------------------------------------------------------------------
 # setup 
-model = SIR()
+model = SIR(subgroups = 2) # 2 divergent subgroups
 
 # defining initial parameters
 model.rates( infection_rate = 0.04 )
  ...
 
-# solving the model equations
+# solving the model equations for a fix percentage ratio of subgroups
 timespace, solutions = model.solve()
 
 # visualising results
-fig = LineChart(timespace, solutions)
+fig = charts.LineChart(timespace, solutions)
 fig.show()
------------------------------------------
+
+
+# or simulate changin percentage ratios of subgroups
+# (Note: this corresponds to varying initial percentages of subgroups, 
+#        NOT of dynamically incrementing or decreasing their 
+#        precentages...)
+
+# (start_percentage, end_percentage) for each subgroup
+percentage_array = [(0.1, 0.4), (0.3, 0.5)] 
+
+# generates a matplotlib figure (also models development of R value), 
+# divides start-end into interval of 10-steps
+simulate(model, p = percentage_array, steps = 10, model_R = True) 
+
+---------------------------------------------------------------------------
 """
 
 from scipy.integrate import solve_ivp # numerical ODE solver from scipy
 import numpy as np 
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
+from matplotlib.lines import Line2D
 import pandas as pd
+import interactive_charts as charts
 
 # Alright Battleplan:
 # - setup n_subgroups (int) << CHECK
@@ -57,24 +73,24 @@ class SIR:
         The SIR Model for a given population containing n divergent subgroups. 
         Note that subgroups does not include the "normally" susceptibles (they will be added externally)
         """
-        self._pop = 100
-        self._infected = 1
         
         self._timestart = 0
-        self._timeend = 10
+        self._timeend = 20
         self._timespace = np.linspace(self._timestart, self._timeend, 10000)
+
+        self._solutions = None
 
         self._subgroups = subgroups+1
 
         # setup percentages of the different subgroups (initial all equal)
         self._percentages = [1/self._subgroups for i in range(self._subgroups)]    
 
-        self._initials = (100, 1, 0, 0) # initial values for SIR model (100 people, 1 infected, 0 recovered or dead)
+        self._initials = (0.98, 0.02, 0, 0) # initial values for SIR model (98% people susceptible, 2% infected, 0 recovered or dead)
 
         self._inf_rate = 0.4        # infection rate
-        self._rec_rate = 0.7        # recovery rate
-        self.__death_rate = 0.01    # death rate
-        self._rel_rate = 0.005      # relapsation rate
+        self._rec_rate = 0.6        # recovery rate
+        self.__death_rate = 0.05    # death rate
+        self._rel_rate = 0.008      # relapsation rate
 
         # setup the rates factors for the different subgroups
         self._inf_factor = [1 for i in range(subgroups)]
@@ -82,6 +98,11 @@ class SIR:
         self._death_factor = [1 for i in range(subgroups)]
         self._rel_factor = [1 for i in range(subgroups)]
 
+    def solutions(self):
+        """
+        Returns the solutions of self.solve()
+        """
+        return self._solutions
 
     def groups(self):
         """
@@ -91,7 +112,7 @@ class SIR:
 
     def model(self, t, initials):
         """
-        The SIR Model
+        The SIRD Model
         """
         S = initials[0]
         I = initials[1]
@@ -132,16 +153,47 @@ class SIR:
         # get and transpose results
         solution = SIRD_system.sol(self._timespace)
         solutions = [i.T for i in solution]
+        self._solutions = solutions
         return self._timespace, solutions
+
+    def R0(self):
+        """
+        Returns R0 as weighted (infection_rate + relapsation_rate) / (recovery_rate + death_rate)
+        """
+        upper = self._infection_rate() + self._relapsation_rate()
+        lower = self._recovery_rate() + self._death_rate()
+        R0 = upper / lower
+        return R0
+
+    def R(self, S:(float or np.array) = None):
+        """
+        Returns the R value either for a single timepoint 
+        (if S = float) or an entire timespan (if S = np.array), 
+        if S is None, precomputed solutions will be used...
+        """
+        if S is None: 
+            S = self.solutions()[0]
+        elif isinstance(S, (float)):
+            if S > 1: 
+                S = S / sum(self._initials) # transform into proportion within the population
+        else: 
+            if any([i > 1 for i in list(S)]):
+                S = S / sum(self._initials)
+
+        R = S * self.R0()
+        return R
 
     def initials(self, values=None):
         """
         Setup initial values for the model
-        Default: (100, 1, 0, 0)
+        Default: (0.98, 0.02, 0, 0)
         """
         if values is None: 
             return self._initials
         else: 
+            # convert to proprtion
+            if any([i > 1 for i in values]):
+                values = tuple([i / sum(values) for i in values])
             self._initials = values
 
     def set_timespace(self, start=0, stop=10, step=10000):
@@ -254,69 +306,243 @@ class SIR:
         return rate
 
 
-def LineChart(timespace, solutions):
-    fig = go.Figure()
-
-    for sol, name in zip(solutions, ["Susceptibles", "Infected", "Recovered", "Dead"]):
-        fig.add_trace(
-            go.Scatter(
-                        x=timespace, y=sol,
-                        mode='lines',
-                        name=name, 
-                        hoverinfo = "y+name"
-                    )
-                )
-    fig.update_layout(
-        title = "Disease Dynamics",
-        xaxis = dict(
-            title = "Timespan (e.g. weeks or months)"
-        ), 
-        yaxis = dict(
-            title = "Number of People per Category"
-        )
-    )
-    return fig
-
-def TimepointBarChart(t, timepoints, solutions, population):
-    fig = go.Figure()
-
-    idx = np.where(timepoints == t)
-
-    names = ["Susceptibles", "Infected", "Recovered", "Dead"]
-
-    df = pd.DataFrame(
-                    dict(
-                        names = names, 
-                        y = [round(i[idx][0]) for i in solutions],
-                    )
-                )
-    fig.add_trace(
-        go.Bar(     
-            
-                    x=df["names"], 
-                    y=df["y"],
-                    # name=names, 
-                    # hoverinfo = "y+name"
-                )
-            )
-    fig.update_layout(
-        yaxis = dict( range = (0, population)), 
-        title = f"Population at t = {t}",
-    )
-    return fig
 
 # fig = LineChart()
 # fig.show()
 
-if __name__ == '__main__':
+# if __name__ == "__main__":
 
-    model = SIR(subgroups = 2)
-    model.percentages((0.43, 0.22))
-    model.factors(
-        infection_factor = (3, 12),
-        recovery_factor = (12, 0.99),
+    # model = SIR(subgroups = 2)
+    # model.percentages((0.43, 0.22))
+    # model.factors(
+    #     infection_factor = (3, 12),
+    #     recovery_factor = (12, 0.99),
+    # )
+    # print(model.factors())
+
+    # t, s = model.solve()
+    # print(s)
+
+
+def simulate(model, p:np.array, steps = 10, model_R = False, summary = False, ax = None, show=False, **kwargs):
+    """
+    Simulate the effect of changing population percentages 
+    within a model, where p is an array of starting and end percentages of each subgroup as tuple.
+    """
+
+    # get some kwargs and setup default values
+    show_legend = kwargs.pop("show_legend", True)
+    colors = kwargs.pop("colors", ["mediumblue", "darkred", "darkcyan", "black"])
+    yscale = kwargs.pop("yscale", "linear")
+    show_threshold = kwargs.pop("threshold", True)
+    first_alpha = kwargs.pop("fadeout", 0.4)
+    show_plot_titles = kwargs.pop("plot_titles", True)
+
+    # prepare plt subplots for plotting
+    ax, Rax, sum_ax = _prepare_axes(model_R, summary, ax, kwargs)
+
+    # summary endpoint statistics dict    
+    end_stats = {"Susceptibles" : [], "Infectuous" : [], "Recovered" : [], "Deceased" : []}
+
+    # generate percentages for steps and corresponding fadeout alphas
+    percents = [np.linspace(start = i[0], stop = i[1], num = steps) for i in list(p)]
+    percents = zip(*percents) # transpose to get the ith percentage for each subgroup together...
+    alphas = [1] + list(np.linspace(first_alpha, 0.01, num = steps))
+
+
+    # make the main linechart (+ R chart if model_R)
+    # yeah, the arguments are really long...
+    _dynamics_linechart(model, model_R, summary, ax, kwargs, show_legend, colors, yscale, show_threshold, show_plot_titles, Rax, end_stats, percents, alphas)
+
+    # make additional summary chart
+    if summary:
+        _summary_barchart(sum_ax, end_stats, yscale, show_plot_titles)
+
+    if show: 
+        plt.tight_layout()
+        plt.show()
+
+
+
+
+
+def _dynamics_linechart(model, model_R, summary, ax, kwargs, show_legend, colors, yscale, show_threshold, show_plot_titles, Rax, end_stats, percents, alphas):
+    """
+    Draw the main disease dynamics line chart
+    """
+    for percent, alpha in zip(percents, alphas):
+        model.percentages(percent)
+
+        t, sol = model.solve()
+
+        for s, c in zip(sol, colors): 
+            ax.plot(t, s, c = c, alpha = alpha, **kwargs)
+
+        if summary: 
+            end_stats["Susceptibles"].append(sol[0][-1])
+            end_stats["Infectuous"].append(sol[1][-1])
+            end_stats["Recovered"].append(sol[2][-1])
+            end_stats["Deceased"].append(sol[3][-1])
+
+        if model_R:
+            Rax.plot(t, model.R(sol[0]), alpha = alpha, c = "darkslategray")
+
+
+    # graph formatting
+    ax.spines["right"].set_visible(False)
+    ax.spines["top"].set_visible(False)
+    ax.set_yscale(yscale) # log scale makes seeing the different lines more easy
+    ax.set(
+        xlabel = "Timespan (e.g. weeks or months)", 
+        title = "Disease Dynamics" if show_plot_titles else None, 
+        ylabel = "Proportion of \n individuals per Category",
     )
-    print(model.factors())
+    
+    if show_threshold:
+        _immunity_thershold_line(model, ax)
 
-    t, s = model.solve()
-    print(s)
+    if show_legend:
+        ax.legend(
+            handles = [
+                        Line2D([0], [0], color=colors[0], lw=2, label="Susceptibles"),
+                        Line2D([0], [0], color=colors[1], lw=2, label="Infectuous"),
+                        Line2D([0], [0], color=colors[2], lw=2, label="Recovered"),
+                        Line2D([0], [0], color=colors[3], lw=2, label="Deceased"),
+                    ],
+            bbox_to_anchor = (1, 1), frameon = False
+        )
+
+    if model_R: # some more reformatting of the model_R chart
+        _Rvalue_chart_reformat(Rax, model, yscale, show_threshold, show_plot_titles)
+
+def _immunity_thershold_line(model, ax):
+    """
+    Draw a hashed herd immunity line
+    """
+    # population threshold for herd immunity (HIT) (for susceptibles)
+    ax.hlines(
+            y = 1 / model.R0() , 
+            xmin = min(model.timespace()), 
+            xmax = max(model.timespace()), 
+            color = "dimgray", linestyle = "--", linewidth = 2,
+        )
+
+
+def _Rvalue_chart_reformat(ax, model, yscale, show_threshold, show_plot_titles):
+    """
+    Generate a linechart showing the dynamics of the R value
+    """
+    ax.spines["right"].set_visible(False)
+    ax.spines["top"].set_visible(False)
+    ax.set_yscale(yscale) # log scale makes seeing the different lines more easy
+    ax.set(
+            xlabel = "Timespan (e.g. weeks or months)", 
+            title = "R Value Dynamics" if show_plot_titles else None, 
+            ylabel = "R value"
+        )
+
+    if show_threshold:
+        # R == 1
+        ax.hlines(
+                    y = 1,  
+                    xmin = min(model.timespace()), 
+                    xmax = max(model.timespace()), 
+                    color = "dimgray", linestyle = "--", linewidth = 2,
+                )
+
+def _summary_barchart(ax, end_stats, yscale, show_plot_titles):
+    """
+    Generate an endpoint population summary barchart...
+    """
+    df = pd.DataFrame(end_stats)
+    df = df.transpose()
+    df.plot.bar(    
+                        ax = ax, 
+                        colormap = "Blues_r", 
+                        legend = False, rot = 0,
+                        edgecolor = "black",
+                        alpha = 0.8, 
+                        )
+    # axis formatting
+    ax.spines["right"].set_visible(False)
+    ax.spines["top"].set_visible(False)
+    ax.set_yscale(yscale) # log scale makes seeing the different lines more easy
+    ax.set(
+            xlabel = "", 
+            title = "Population at Endpoint of Simulation" if show_plot_titles else None,
+            ylabel = "Proportion of \n individuals per Category",
+        )
+
+
+def _prepare_axes(model_R, summary, ax, kwargs):
+    """
+    Extracts the subplots for plotting or generates a new 
+    figure with the appropriate number of subplots
+    """
+    # check what additional plots must be made
+    # and see if axs have already been passed for those
+    make_extra_plots = False
+    try:
+        if model_R:
+            Rax = ax[1]
+        if summary:
+            sum_ax = ax[2] if model_R else ax[1]
+        if summary or model_R:
+            ax = ax[0]
+
+    except:
+        make_extra_plots = True
+
+    # if additional axes are required, make a new figure...
+    # this will ignore any submitted axes!
+
+    if ax is None or make_extra_plots: 
+        # get number of required plots
+        subplots = 1 + summary + model_R
+
+        figsize = kwargs.pop("figsize", None)
+        fig, axs = plt.subplots(subplots, figsize = figsize)
+
+        ax = axs[0] if subplots > 1 else axs
+        Rax = axs[1] if model_R else None
+        if summary: 
+            sum_ax = axs[2] if model_R else axs[1]
+        else:
+            sum_ax = None
+
+    return ax,Rax,sum_ax
+
+
+if __name__ == "__main__":
+    model = SIR(subgroups = 2)
+    model.initials(
+        (98, 12, 0, 0)
+    )
+    model.set_timespace(stop = 100)
+
+    model.rates( infection_rate = 0.5, recovery_rate = 0.5 )
+
+    model.factors( 
+        infection_factor    =       (20, 0.4),
+        recovery_factor     =       (0.5, 2), 
+        death_factor        =       (4, 0.1),
+        relapsation_factor  =       (2.5, 1),
+    )
+
+    # fig, axs = plt.subplots(ncols = 2)
+
+    # ax1 = simulate(
+    #                 model, 
+    #                 p = np.array([(0.10, 0.75), (0.75, 0.25)]), 
+    #                 ax = axs[0], R_ax = axs[1],
+    #                 model_R = True,
+    #                 # yscale = "log", 
+    #             )
+
+    # plt.tight_layout()
+    # plt.show()
+
+    model.solve()
+    t = .15
+    rval_chart = charts.LineChart(model)
+    rval_chart.show()
