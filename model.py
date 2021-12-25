@@ -305,6 +305,25 @@ class SIR:
         rate = self.__death_rate * rate
         return rate
 
+
+
+# fig = LineChart()
+# fig.show()
+
+# if __name__ == "__main__":
+
+    # model = SIR(subgroups = 2)
+    # model.percentages((0.43, 0.22))
+    # model.factors(
+    #     infection_factor = (3, 12),
+    #     recovery_factor = (12, 0.99),
+    # )
+    # print(model.factors())
+
+    # t, s = model.solve()
+    # print(s)
+
+
 def simulate(model, p:np.array, steps = 10, model_R = False, summary = False, ax = None, show=False, **kwargs):
     """
     Simulate the effect of changing population percentages 
@@ -317,6 +336,7 @@ def simulate(model, p:np.array, steps = 10, model_R = False, summary = False, ax
     yscale = kwargs.pop("yscale", "linear")
     show_threshold = kwargs.pop("threshold", True)
     first_alpha = kwargs.pop("fadeout", 0.4)
+    start_alpha = kwargs.pop("alpha", 1.0)
     show_plot_titles = kwargs.pop("plot_titles", True)
 
     # prepare plt subplots for plotting
@@ -328,7 +348,7 @@ def simulate(model, p:np.array, steps = 10, model_R = False, summary = False, ax
     # generate percentages for steps and corresponding fadeout alphas
     percents = [np.linspace(start = i[0], stop = i[1], num = steps) for i in list(p)]
     percents = zip(*percents) # transpose to get the ith percentage for each subgroup together...
-    alphas = [1] + list(np.linspace(first_alpha, 0.01, num = steps))
+    alphas = [start_alpha] + list(np.linspace(first_alpha, 0.01, num = steps))
 
 
     # make the main linechart (+ R chart if model_R)
@@ -342,6 +362,8 @@ def simulate(model, p:np.array, steps = 10, model_R = False, summary = False, ax
     if show: 
         plt.tight_layout()
         plt.show()
+
+
 
 
 
@@ -365,7 +387,9 @@ def _dynamics_linechart(model, model_R, summary, ax, kwargs, show_legend, colors
 
         if model_R:
             Rax.plot(t, model.R(sol[0]), alpha = alpha, c = "darkslategray")
-
+        
+        if show_threshold:
+            _immunity_thershold_line(model, ax, alpha)
 
     # graph formatting
     ax.spines["right"].set_visible(False)
@@ -377,8 +401,7 @@ def _dynamics_linechart(model, model_R, summary, ax, kwargs, show_legend, colors
         ylabel = "Proportion of \n individuals per Category",
     )
     
-    if show_threshold:
-        _immunity_thershold_line(model, ax)
+    
 
     if show_legend:
         ax.legend(
@@ -394,7 +417,7 @@ def _dynamics_linechart(model, model_R, summary, ax, kwargs, show_legend, colors
     if model_R: # some more reformatting of the model_R chart
         _Rvalue_chart_reformat(Rax, model, yscale, show_threshold, show_plot_titles)
 
-def _immunity_thershold_line(model, ax):
+def _immunity_thershold_line(model, ax, alpha):
     """
     Draw a hashed herd immunity line
     """
@@ -403,7 +426,9 @@ def _immunity_thershold_line(model, ax):
             y = 1 / model.R0() , 
             xmin = min(model.timespace()), 
             xmax = max(model.timespace()), 
-            color = "dimgray", linestyle = "--", linewidth = 2,
+            color = "dimgray", linestyle = "--", 
+            linewidth = 2,
+            alpha = alpha
         )
 
 
@@ -420,14 +445,13 @@ def _Rvalue_chart_reformat(ax, model, yscale, show_threshold, show_plot_titles):
             ylabel = "R value"
         )
 
-    if show_threshold:
-        # R == 1
-        ax.hlines(
-                    y = 1,  
-                    xmin = min(model.timespace()), 
-                    xmax = max(model.timespace()), 
-                    color = "dimgray", linestyle = "--", linewidth = 2,
-                )
+    # R == 1
+    ax.hlines(
+                y = 1,  
+                xmin = min(model.timespace()), 
+                xmax = max(model.timespace()), 
+                color = "dimgray", linestyle = "--", linewidth = 2,
+            )
 
 def _summary_barchart(ax, end_stats, yscale, show_plot_titles):
     """
@@ -462,14 +486,19 @@ def _prepare_axes(model_R, summary, ax, kwargs):
     # and see if axs have already been passed for those
     make_extra_plots = False
     try:
-        if model_R:
-            Rax = ax[1]
+        Rax = ax[1] if model_R else None
+        
         if summary:
             sum_ax = ax[2] if model_R else ax[1]
+        else:
+            sum_ax = None
+
         if summary or model_R:
             ax = ax[0]
 
     except:
+        Rax = None
+        sum_ax = None
         make_extra_plots = True
 
     # if additional axes are required, make a new figure...
@@ -488,6 +517,7 @@ def _prepare_axes(model_R, summary, ax, kwargs):
             sum_ax = axs[2] if model_R else axs[1]
         else:
             sum_ax = None
+
 
     return ax,Rax,sum_ax
 
